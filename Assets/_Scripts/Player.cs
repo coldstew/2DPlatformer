@@ -18,7 +18,9 @@ public class Player : MonoBehaviour
     private Animator myAnimator;
     private Collider2D myCollider2D;
     private float gravityScaleAtStart;
-
+    
+    private TimeController timeController;
+    
     // Message then methods
     void Start()
     {
@@ -26,17 +28,26 @@ public class Player : MonoBehaviour
         myAnimator = GetComponent<Animator>();
         myCollider2D = GetComponent<Collider2D>();
         gravityScaleAtStart = myRigidbody.gravityScale;
-    }
-    
-    void FixedUpdate()
-    {
-        Run();
-        FlipSprite();
-        Jump();
-        ClimbLadder();
+        timeController = FindObjectOfType(typeof(TimeController)) as TimeController;
     }
 
-    private void Run()
+    void Update()
+    {
+        
+        
+    }
+    void FixedUpdate()
+{
+if (!timeController.isReversing)
+{
+    Run();
+    FlipSprite();
+    Jump();
+    ClimbLadder();
+}
+}
+
+private void Run()
     {
         float controlThrow = CrossPlatformInputManager.GetAxis("Horizontal");
         Vector2 playerVelocity = new Vector2(controlThrow * runSpeed, myRigidbody.velocity.y);
