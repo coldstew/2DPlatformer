@@ -13,8 +13,8 @@ TagManager:
   - UI
   - 
   - 
-  - 
-  - 
+  - Ground
+  - Climbing
   - 
   - 
   - 
@@ -44,9 +44,12 @@ TagManager:
   - name: Background
     uniqueID: 3742381279
     locked: 0
-  - name: Foreground
-    uniqueID: 3674203349
+  - name: Climbing
+    uniqueID: 187681135
     locked: 0
   - name: Player
     uniqueID: 1699656861
+    locked: 0
+  - name: Foreground
+    uniqueID: 3674203349
     locked: 0
