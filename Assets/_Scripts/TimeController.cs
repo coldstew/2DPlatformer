@@ -1,51 +1,123 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using System.Collections;
+
+
+public class Keyframe
+{
+    public Vector3 position;
+    public Vector3 rotation;
+
+    public Keyframe(Vector3 position, Vector3 rotation)
+    {
+        this.position = position;
+        this.rotation = rotation;
+    }
+}
 
 public class TimeController : MonoBehaviour
 {
+    public GameObject player;
+    public ArrayList keyframes;
+    private Camera camera;
     public bool isReversing = false;
+    [SerializeField] float intensity = 0f;
+    [SerializeField] float colorIntensity = 0f;
+    [SerializeField] float flipIntensity = 0f;
 
-    [SerializeField] private GameObject player;
-    [SerializeField] private ArrayList playerPositions;
-    [SerializeField] private ArrayList playerRotations;
+    public int keyframe = 5;
+    private int frameCounter = 0;
+    private int reverseCounter = 0;
+    [SerializeField] int maxFrame = 16;
+
+    private Vector3 currentPosition;
+    private Vector3 previousPosition;
+    private Vector3 currentRotation;
+    private Vector3 previousRotation;
+
+    private bool firstRun = true;
 
     void Start()
     {
-        playerPositions = new ArrayList();
-        playerRotations = new ArrayList();
+        keyframes = new ArrayList();
+        camera = Camera.main;
     }
 
     void Update()
     {
-        SetIsReversing();
-    }
-
-    private void SetIsReversing()
-    {
         if (Input.GetKey(KeyCode.R))
         {
             isReversing = true;
+            camera.GetComponent<GlitchEffect>().intensity = intensity;
+            camera.GetComponent<GlitchEffect>().colorIntensity = colorIntensity;
+            camera.GetComponent<GlitchEffect>().flipIntensity = flipIntensity;
         }
         else
         {
             isReversing = false;
+            firstRun = true;
+            camera.GetComponent<GlitchEffect>().intensity = 0f;
+            camera.GetComponent<GlitchEffect>().colorIntensity = 0f;
+            camera.GetComponent<GlitchEffect>().flipIntensity = 0f;
         }
     }
 
     void FixedUpdate()
     {
-        if (!isReversing && player)
+        if (!isReversing)
         {
-            playerPositions.Add(player.transform.position);
+            if (frameCounter < keyframe)
+            {
+                frameCounter += 1;
+            }
+            else
+            {
+                frameCounter = 0;
+                keyframes.Add(new Keyframe(player.transform.position, player.transform.localEulerAngles));
+            }
         }
         else
         {
-            player.transform.position = (Vector3) playerPositions[playerPositions.Count - 1];
-            playerPositions.RemoveAt(playerPositions.Count - 1);
+            if (reverseCounter > 0)
+            {
+                reverseCounter -= 1;
+            }
+            else
+            {
+                reverseCounter = keyframe;
+                RestorePositions();
+            }
 
-            player.transform.localEulerAngles = (Vector3) playerRotations[playerRotations.Count - 1];
-            playerRotations.RemoveAt(playerRotations.Count - 1);
+            if (firstRun)
+            {
+                firstRun = false;
+                RestorePositions();
+            }
+
+            float interpolation = (float)reverseCounter / (float)keyframe;
+            player.transform.position = Vector3.Lerp(previousPosition, currentPosition, interpolation);
+            player.transform.localEulerAngles = Vector3.Lerp(previousRotation, currentRotation, interpolation);
+        }
+
+        if (keyframes.Count > maxFrame)
+        {
+            keyframes.RemoveAt(0);
+        }
+    }
+
+    void RestorePositions()
+    {
+        int lastIndex = keyframes.Count - 1;
+        int secondToLastIndex = keyframes.Count - 2;
+
+        if (secondToLastIndex >= 0)
+        {
+            currentPosition = (keyframes[lastIndex] as Keyframe).position;
+            previousPosition = (keyframes[secondToLastIndex] as Keyframe).position;
+
+            currentRotation = (keyframes[lastIndex] as Keyframe).rotation;
+            previousRotation = (keyframes[secondToLastIndex] as Keyframe).rotation;
+
+            keyframes.RemoveAt(lastIndex);
         }
     }
 }

@@ -16,7 +16,8 @@ public class Player : MonoBehaviour
     // Cached component references
     private Rigidbody2D myRigidbody;
     private Animator myAnimator;
-    private Collider2D myCollider2D;
+    private CapsuleCollider2D myBodyCollider2D;
+    private BoxCollider2D myFeet;
     private float gravityScaleAtStart;
     
     private TimeController timeController;
@@ -26,7 +27,8 @@ public class Player : MonoBehaviour
     {
         myRigidbody = GetComponent<Rigidbody2D>();
         myAnimator = GetComponent<Animator>();
-        myCollider2D = GetComponent<Collider2D>();
+        myBodyCollider2D = GetComponent<CapsuleCollider2D>();
+        myFeet = GetComponent<BoxCollider2D>();
         gravityScaleAtStart = myRigidbody.gravityScale;
         timeController = FindObjectOfType(typeof(TimeController)) as TimeController;
     }
@@ -37,17 +39,17 @@ public class Player : MonoBehaviour
         
     }
     void FixedUpdate()
-{
-if (!timeController.isReversing)
-{
-    Run();
-    FlipSprite();
-    Jump();
-    ClimbLadder();
-}
-}
+    {
+        if (!timeController.isReversing)
+        {
+            Run();
+            FlipSprite();
+            Jump();
+            ClimbLadder();
+        }
+    }
 
-private void Run()
+    private void Run()
     {
         float controlThrow = CrossPlatformInputManager.GetAxis("Horizontal");
         Vector2 playerVelocity = new Vector2(controlThrow * runSpeed, myRigidbody.velocity.y);
@@ -59,7 +61,7 @@ private void Run()
 
     private void ClimbLadder()
     {
-        if (!myCollider2D.IsTouchingLayers(LayerMask.GetMask("Climbing")))
+        if (!myFeet.IsTouchingLayers(LayerMask.GetMask("Climbing")))
         {
             myAnimator.SetBool("Climbing", false);
             myRigidbody.gravityScale = gravityScaleAtStart;
@@ -77,7 +79,7 @@ private void Run()
 
     private void Jump()
     {
-        if (!myCollider2D.IsTouchingLayers(LayerMask.GetMask("Ground"))) { return; }
+        if (!myFeet.IsTouchingLayers(LayerMask.GetMask("Ground"))) { return; }
 
         if (CrossPlatformInputManager.GetButtonDown("Jump"))
         {
@@ -86,7 +88,6 @@ private void Run()
         }
     }
     
-
     private void FlipSprite()
     {
         bool playerHasHorizontalSpeed = Mathf.Abs(myRigidbody.velocity.x) > Mathf.Epsilon;
