@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityStandardAssets.CrossPlatformInput;
+using Random = System.Random;
 
 public class Player : MonoBehaviour
 {
@@ -10,6 +11,8 @@ public class Player : MonoBehaviour
     [SerializeField] float runSpeed = 5f;
     [SerializeField] private float jumpSpeed = 5f;
     [SerializeField] private float climbSpeed = 5f;
+    [SerializeField] Vector2 deathKick = new Vector2(25f,25f);
+    
     // State
     private bool isAlive = true;
 
@@ -35,17 +38,17 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        
-        
-    }
-    void FixedUpdate()
-    {
-        if (!timeController.isReversing)
+        if (!isAlive)
+        {
+                return;
+        }
+        if(!timeController.isReversing && isAlive)
         {
             Run();
             FlipSprite();
             Jump();
             ClimbLadder();
+            Die();
         }
     }
 
@@ -87,7 +90,18 @@ public class Player : MonoBehaviour
             myRigidbody.velocity += jumpVelocityToAdd;
         }
     }
-    
+
+    void Die()
+    {
+        if (myBodyCollider2D.IsTouchingLayers(LayerMask.GetMask("Enemy", "Trap")))
+        {
+            isAlive = false;
+            myAnimator.SetTrigger("Dying");
+            GetComponent<Rigidbody2D>().velocity = deathKick;
+            FindObjectOfType<GameSession>().ProcessPlayerDeath();
+        }
+    }
+
     private void FlipSprite()
     {
         bool playerHasHorizontalSpeed = Mathf.Abs(myRigidbody.velocity.x) > Mathf.Epsilon;

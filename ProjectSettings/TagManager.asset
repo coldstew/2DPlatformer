@@ -18,8 +18,8 @@ TagManager:
   - Player
   - Background
   - Enemy
-  - 
-  - 
+  - Trap
+  - Interactables
   - 
   - 
   - 
@@ -49,6 +49,12 @@ TagManager:
     locked: 0
   - name: Enemy
     uniqueID: 1131634251
+    locked: 0
+  - name: Trap
+    uniqueID: 3187483853
+    locked: 0
+  - name: Interactables
+    uniqueID: 4266997391
     locked: 0
   - name: Player
     uniqueID: 1699656861
